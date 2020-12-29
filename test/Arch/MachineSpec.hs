@@ -5,6 +5,9 @@ import Arch.Machine
 
 spec :: Spec
 spec = do
+  describe "load" $ do
+    it "initialize a machine state with a given program" $ do
+      pc (load [0]) `shouldBe` 0
   describe "halt" $ do
     it "should be halted after executing opCode 0, halt" $ do
       halted initial `shouldBe` False
