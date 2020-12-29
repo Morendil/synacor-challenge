@@ -7,6 +7,11 @@ data Machine = Machine {
     , memory :: I.IntMap Int
 }
 
+step :: Machine -> Machine
+step m = case fetch m (pc m) of
+  Just 0 -> m { pc = pc m + 1, halted = True}
+  Nothing -> m
+
 fetch :: Machine -> Int -> Maybe Int
 fetch m addr = I.lookup addr (memory m)
 

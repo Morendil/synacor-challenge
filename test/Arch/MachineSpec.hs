@@ -13,3 +13,7 @@ spec = do
     it "should be halted after executing opCode 0, halt" $ do
       halted initial `shouldBe` False
       halted (halt initial) `shouldBe` True
+  describe "step" $ do
+    it "should fetch and execute an instruction" $ do
+      halted (step $ load [0]) `shouldBe` True
+      pc (step $ load [0]) `shouldBe` 1
