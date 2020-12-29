@@ -9,7 +9,8 @@ data Machine = Machine {
 
 step :: Machine -> Machine
 step m = case fetch m (pc m) of
-  Just 0 -> m { pc = pc m + 1, halted = True}
+  Just 0 -> halt $ m { pc = pc m + 1}
+  Just 21 -> noop $ m { pc = pc m + 1}
   Nothing -> m
 
 fetch :: Machine -> Int -> Maybe Int
@@ -21,6 +22,9 @@ load list =  initial { memory = I.fromList $ indexed list }
 
 halt :: Machine -> Machine
 halt m = m { halted = True }
+
+noop :: Machine -> Machine
+noop = id
 
 initial :: Machine
 initial = Machine {
