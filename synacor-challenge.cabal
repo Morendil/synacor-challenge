@@ -18,6 +18,8 @@ build-type:          Simple
 extra-source-files:  README.md
 
 executable synacor-challenge
+  hs-source-dirs:
+      src
   main-is:             Main.hs
   -- other-modules:
   -- other-extensions:
