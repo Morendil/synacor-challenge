@@ -25,12 +25,18 @@ spec = do
       pc initial `shouldBe` 0
       pc (jump 123 initial) `shouldBe` 123
       pc (step $ load [6, 123]) `shouldBe` 123
-  describe "jmp" $ do
+  describe "jt" $ do
     it "should transfer pc after executing opcode 7, jt, if first arg is nonzero" $ do
       pc (jt 1 123 initial) `shouldBe` 123
       pc (step $ load [7, 1, 123]) `shouldBe` 123
     it "should leave pc alone after executing opcode 7, jt, if first arg is zero" $ do
       pc (step $ load [7, 0, 123]) `shouldBe` 3
+  describe "jf" $ do
+    it "should transfer pc after executing opcode 8, jf, if first arg is zero" $ do
+      pc (jf 0 123 initial) `shouldBe` 123
+      pc (step $ load [8, 0, 123]) `shouldBe` 123
+    it "should leave pc alone after executing opcode 8, jf, if first arg is nonzero" $ do
+      pc (step $ load [8, 1, 123]) `shouldBe` 3
   describe "step" $ do
     it "should fetch and execute an instruction" $ do
       halted (step $ load [0]) `shouldBe` True

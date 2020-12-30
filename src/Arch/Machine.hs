@@ -22,6 +22,7 @@ step m = case fetch m current of
   Just 19 -> out a (m { pc = current + 2})
   Just 6 -> jump a m
   Just 7 -> jt a b (m { pc = current + 3})
+  Just 8 -> jf a b (m { pc = current + 3})
   Just x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   Nothing -> m
   where current = pc m
@@ -49,6 +50,9 @@ jump val m = m { pc = val }
 
 jt :: Word16 -> Word16 -> Machine -> Machine
 jt a b m = if a /= 0 then jump b m else m
+
+jf :: Word16 -> Word16 -> Machine -> Machine
+jf a b m = if a == 0 then jump b m else m
 
 noop :: Machine -> Machine
 noop = id
