@@ -39,6 +39,7 @@ step m = case fetch m current of
   10 -> setreg ra ((b*c)`mod`32768) (m { pc = current + 4})
   11 -> setreg ra (b `mod` c) (m { pc = current + 4})
   15 -> setreg ra (fetch m b) (m { pc = current + 3})
+  16 -> write a b (m { pc = current + 3})
   x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
         a = fetch m $ current+1
@@ -91,6 +92,9 @@ jt a b m = if a /= 0 then jump b m else m
 
 jf :: Word16 -> Word16 -> Machine -> Machine
 jf a b m = if a == 0 then jump b m else m
+
+write :: Word16 -> Word16 -> Machine -> Machine
+write addr val m = m { memory = M.insert addr val (memory m) }
 
 noop :: Machine -> Machine
 noop = id
