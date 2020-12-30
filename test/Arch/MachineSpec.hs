@@ -20,6 +20,11 @@ spec = do
       output (out 65 initial) `shouldBe` [65]
       output (step $ load [19, 65]) `shouldBe` [65]
       pc (step $ load [19, 65]) `shouldBe` 2
+  describe "jmp" $ do
+    it "should transfer pc after executing opcode 6, jmp" $ do
+      pc initial `shouldBe` 0
+      pc (jump 123 initial) `shouldBe` 123
+      pc (step $ load [6, 123]) `shouldBe` 123
   describe "step" $ do
     it "should fetch and execute an instruction" $ do
       halted (step $ load [0]) `shouldBe` True

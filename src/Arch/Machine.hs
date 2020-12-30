@@ -1,12 +1,12 @@
 module Arch.Machine where
-import qualified Data.IntMap as I
+import qualified Data.Map as M
 import Data.Maybe (fromJust)
 import Data.Word
 
 data Machine = Machine {
       halted :: Bool
-    , pc :: Int
-    , memory :: I.IntMap Word16
+    , pc :: Word16
+    , memory :: M.Map Word16 Word16
     , output :: [Word16]
     , message :: String
 } deriving (Eq, Show)
@@ -20,16 +20,17 @@ step m = case fetch m current of
   Just 0 -> halt $ m { pc = current + 1}
   Just 21 -> noop $ m { pc = current + 1}
   Just 19 -> out a (m { pc = current + 2})
+  Just 6 -> jump a m
   Just x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   Nothing -> m
   where current = pc m
         a = fromJust $ fetch m $ current+1
 
-fetch :: Machine -> Int -> Maybe Word16
-fetch m addr = I.lookup addr (memory m)
+fetch :: Machine -> Word16 -> Maybe Word16
+fetch m addr = M.lookup addr (memory m)
 
 load :: [Word16] -> Machine
-load list =  initial { memory = I.fromList $ indexed list }
+load list =  initial { memory = M.fromList $ indexed list }
   where indexed = zip [0..]
 
 halt :: Machine -> Machine
@@ -41,6 +42,9 @@ crash msg m = halt $ m { message = msg }
 out :: Word16 -> Machine -> Machine
 out val m = m { output = output m ++ [val] }
 
+jump :: Word16 -> Machine -> Machine
+jump val m = m { pc = val }
+
 noop :: Machine -> Machine
 noop = id
 
@@ -48,7 +52,7 @@ initial :: Machine
 initial = Machine {
         halted = False
       , pc = 0
-      , memory = I.empty
+      , memory = M.empty
       , output = []
       , message = ""
     }
