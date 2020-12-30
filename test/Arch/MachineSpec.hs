@@ -43,6 +43,9 @@ spec = do
   describe "set" $ do
     it "should set a register value after executing opcode 1, set" $ do
       reg (step $ load [1, 32768, 107]) 32768 `shouldBe` 107
+  describe "set" $ do
+    it "should set a register value from memory after opcode 15, rmem" $ do
+      reg (step $ load [15, 32768, 0]) 32768 `shouldBe` 15
   describe "add" $ do
     it "should add b and c (mod 32768) arguments to a after opcode 9, add" $ do
       reg (step $ load [9, 32768, 30000, 30000]) 32768 `shouldBe` 27232

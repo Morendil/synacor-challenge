@@ -38,6 +38,7 @@ step m = case fetch m current of
   17 -> push (current + 2) (jump a m)
   10 -> setreg ra ((b*c)`mod`32768) (m { pc = current + 4})
   11 -> setreg ra (b `mod` c) (m { pc = current + 4})
+  15 -> setreg ra (fetch m b) (m { pc = current + 3})
   x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
         a = fetch m $ current+1
