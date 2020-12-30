@@ -7,9 +7,13 @@ data Machine = Machine {
     , pc :: Int
     , memory :: I.IntMap Int
     , output :: [Int]
-}
+} deriving (Eq, Show)
+
+converge :: Eq a => (a -> a) -> a -> a
+converge = until =<< ((==) =<<)
 
 step :: Machine -> Machine
+step m | halted m = m
 step m = case fetch m current of
   Just 0 -> halt $ m { pc = current + 1}
   Just 21 -> noop $ m { pc = current + 1}

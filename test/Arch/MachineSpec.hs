@@ -13,6 +13,7 @@ spec = do
     it "should be halted after executing opCode 0, halt" $ do
       halted initial `shouldBe` False
       halted (halt initial) `shouldBe` True
+      step (halt initial) `shouldBe` halt initial
   describe "out" $ do
     it "should output one character after executing opcode 19, out" $ do
       output initial `shouldBe` []
