@@ -1,9 +1,73 @@
+{-# LANGUAGE NamedFieldPuns #-}
+
 module Arch.Machine where
 import qualified Data.Map as M
-import Data.Maybe (fromMaybe)
+import Data.Maybe (fromMaybe, fromJust)
 import Data.Word
 import Data.Bits
 import Data.Char
+import Data.List
+import Debug.Trace
+import Text.Printf
+
+data Opcode = Opcode {
+    name :: String
+  , width :: Word16
+}
+
+data Instruction = Instruction {
+    op :: Opcode
+  , args :: [Word16]
+  , addr :: Word16
+}
+
+instance Show Instruction where
+  show (Instruction { op = Opcode {name, width}, args, addr }) = (printf "0x%06x  " addr) ++ name ++ " [" ++ (intercalate "," $ map showVal args) ++ "]"
+    where showVal val | val < 32768 = printf "0x%x" val
+          showVal reg = "r" ++ show (reg - 32768)
+
+opcodes :: [(Word16, Opcode)]
+opcodes = [
+    (0,   Opcode { name = "halt",   width = 1} )
+  , (1,   Opcode { name = "set",    width = 3} )
+  , (2,   Opcode { name = "push",   width = 2} )
+  , (3,   Opcode { name = "pop",    width = 2} )
+  , (4,   Opcode { name = "eq",     width = 4} )
+  , (5,   Opcode { name = "gt",     width = 4} )
+  , (6,   Opcode { name = "jmp",    width = 2} )
+  , (7,   Opcode { name = "jt",     width = 3} )
+  , (8,   Opcode { name = "jf",     width = 3} )
+  , (9,   Opcode { name = "add",    width = 4} )
+  , (10,  Opcode { name = "mult",   width = 4} )
+  , (11,  Opcode { name = "mod",    width = 4} )
+  , (12,  Opcode { name = "and",    width = 4} )
+  , (13,  Opcode { name = "or",     width = 4} )
+  , (14,  Opcode { name = "not",    width = 3} )
+  , (15,  Opcode { name = "rmem",   width = 3} )
+  , (16,  Opcode { name = "wmem",   width = 3} )
+  , (17,  Opcode { name = "call",   width = 2} )
+  , (18,  Opcode { name = "ret",    width = 1} )
+  , (19,  Opcode { name = "out",    width = 2} )
+  , (20,  Opcode { name = "in",     width = 2} )
+  , (21,  Opcode { name = "noop",   width = 1} )
+  ]
+
+
+disassemble :: [Word16] -> [Instruction]
+disassemble program = disassembleFrom 0 program
+
+disassembleFrom :: Word16 -> [Word16] -> [Instruction]
+disassembleFrom offset program = disassemble' offset $ drop (fromInteger $ toInteger $ offset) program
+
+disassemble' :: Word16 -> [Word16] -> [Instruction]
+disassemble' _ [] = []
+disassemble' offset words = instr:disassemble' (offset+width op) rest
+  where instr = Instruction { op, args, addr }
+        rest = drop opWidth words
+        opWidth = fromInteger $ toInteger $ width op
+        op = fromJust $ lookup (head words) opcodes
+        args = tail $ take opWidth words
+        addr = offset
 
 data Machine = Machine {
       halted :: Bool
@@ -54,10 +118,11 @@ step m = case fetch m current of
         ra = raw m (current+1)
 
 fetch :: Machine -> Word16 -> Word16
-fetch m addr = if register then goRegister else plainValue
+fetch m addr = if register then inspect goRegister else plainValue
   where plainValue = fromMaybe 0 $ M.lookup addr (memory m)
         register = plainValue >= 32768
         goRegister = fromMaybe 0 $ M.lookup plainValue (registers m)
+        inspect n = if plainValue == 32775 then traceShow (pc m) n else n
 
 raw :: Machine -> Word16 -> Word16
 raw m addr = fromMaybe 0 $ M.lookup addr (memory m)
