@@ -46,6 +46,9 @@ spec = do
   describe "add" $ do
     it "should add b and c (mod 32768) arguments to a after opcode 9, add" $ do
       reg (step $ load [9, 32768, 30000, 30000]) 32768 `shouldBe` 27232
+  describe "mult" $ do
+    it "should multiply b and c (mod 32768) arguments to a after opcode 10, mul" $ do
+      reg (step $ load [10, 32768, 30000, 30000]) 32768 `shouldBe` 26880
   describe "eq" $ do
     it "should set a to comparison of b and c after opcode 4, eq" $ do
       reg (step $ load [4, 32768, 30000, 30000]) 32768 `shouldBe` 1
