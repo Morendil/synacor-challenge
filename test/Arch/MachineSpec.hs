@@ -85,6 +85,10 @@ spec = do
     it "should push to the stack and jump after opcode 17, call" $ do
       stack (step $ load [17, 100]) `shouldBe` [2]
       pc (step $ load [17, 100]) `shouldBe` 100
+  describe "ret" $ do
+    it "should pop and jump to the popped address after 18, ret" $ do
+      stack (step $ step $ load [17, 3, 0, 18]) `shouldBe` []
+      pc (step $ step $ load [17, 3, 0, 18]) `shouldBe` 2
   describe "pop" $ do
     it "should pop from the stack after opcode 3, pop" $ do
       stack (step $ step $ step $ load [2, 1, 2, 2, 3, 32768]) `shouldBe` [1]
