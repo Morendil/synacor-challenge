@@ -1,12 +1,14 @@
 module Arch.Machine where
 import qualified Data.Map as M
-import Data.Maybe (fromJust)
+import Data.Maybe (fromMaybe)
 import Data.Word
 
 data Machine = Machine {
       halted :: Bool
     , pc :: Word16
     , memory :: M.Map Word16 Word16
+    , registers :: M.Map Word16 Word16
+    , stack :: [Word16]
     , output :: [Word16]
     , message :: String
 } deriving (Eq, Show)
@@ -17,20 +19,38 @@ converge = until =<< ((==) =<<)
 step :: Machine -> Machine
 step m | halted m = m
 step m = case fetch m current of
-  Just 0 -> halt $ m { pc = current + 1}
-  Just 21 -> noop $ m { pc = current + 1}
-  Just 19 -> out a (m { pc = current + 2})
-  Just 6 -> jump a m
-  Just 7 -> jt a b (m { pc = current + 3})
-  Just 8 -> jf a b (m { pc = current + 3})
-  Just x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
-  Nothing -> m
+  0 -> halt $ m { pc = current + 1}
+  21 -> noop $ m { pc = current + 1}
+  19 -> out a (m { pc = current + 2})
+  6 -> jump a m
+  7 -> jt a b (m { pc = current + 3})
+  8 -> jf a b (m { pc = current + 3})
+  1 -> setreg ra b (m { pc = current + 3})
+  9 -> setreg ra ((b+c)`mod`32768) (m { pc = current + 4})
+  4 -> setreg ra (if b==c then 1 else 0) (m { pc = current + 4})
+  2 -> push a (m { pc = current + 2})
+  3 -> setreg ra (top m) $ pop (m { pc = current + 2})
+  x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
-        a = fromJust $ fetch m $ current+1
-        b = fromJust $ fetch m $ current+2
+        a = fetch m $ current+1
+        b = fetch m $ current+2
+        c = fetch m $ current+3
+        ra = raw m (current+1)
 
-fetch :: Machine -> Word16 -> Maybe Word16
-fetch m addr = M.lookup addr (memory m)
+fetch :: Machine -> Word16 -> Word16
+fetch m addr = if register then goRegister else plainValue
+  where plainValue = fromMaybe 0 $ M.lookup addr (memory m)
+        register = plainValue >= 32768
+        goRegister = fromMaybe 0 $ M.lookup plainValue (registers m)
+
+raw :: Machine -> Word16 -> Word16
+raw m addr = fromMaybe 0 $ M.lookup addr (memory m)
+
+reg :: Machine -> Word16 -> Word16
+reg m addr = fromMaybe 0 $ M.lookup addr (registers m)
+
+setreg :: Word16 -> Word16 -> Machine -> Machine
+setreg which val m = m { registers = M.insert which val (registers m) }
 
 load :: [Word16] -> Machine
 load list =  initial { memory = M.fromList $ indexed list }
@@ -44,6 +64,15 @@ crash msg m = halt $ m { message = msg }
 
 out :: Word16 -> Machine -> Machine
 out val m = m { output = output m ++ [val] }
+
+push :: Word16 -> Machine -> Machine
+push val m = m { stack = val:(stack m) }
+
+top :: Machine -> Word16
+top m = head $ stack m
+
+pop :: Machine -> Machine
+pop m = m { stack = tail $ stack m }
 
 jump :: Word16 -> Machine -> Machine
 jump val m = m { pc = val }
@@ -62,6 +91,8 @@ initial = Machine {
         halted = False
       , pc = 0
       , memory = M.empty
+      , registers = M.empty
       , output = []
+      , stack = []
       , message = ""
     }
