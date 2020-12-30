@@ -33,6 +33,7 @@ step m = case fetch m current of
   3 -> setreg ra (top m) $ pop (m { pc = current + 2})
   5 -> setreg ra (if b>c then 1 else 0) (m { pc = current + 4})
   12 -> setreg ra (b .&. c) (m { pc = current + 4})
+  13 -> setreg ra (b .|. c) (m { pc = current + 4})
   x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
         a = fetch m $ current+1
