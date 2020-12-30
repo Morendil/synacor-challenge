@@ -50,6 +50,11 @@ spec = do
     it "should set a to comparison of b and c after opcode 4, eq" $ do
       reg (step $ load [4, 32768, 30000, 30000]) 32768 `shouldBe` 1
       reg (step $ load [4, 32769, 30000, 30001]) 32769 `shouldBe` 0
+  describe "gt" $ do
+    it "should set a to comparison of b and c after opcode 5, gt" $ do
+      reg (step $ load [5, 32768, 30000, 30000]) 32768 `shouldBe` 0
+      reg (step $ load [5, 32769, 30000, 30001]) 32769 `shouldBe` 0
+      reg (step $ load [5, 32769, 30001, 30000]) 32769 `shouldBe` 1
   describe "push" $ do
     it "should push to the stack after opcode 2, push" $ do
       stack (step $ step $ load [2, 1, 2, 2]) `shouldBe` [2,1]
