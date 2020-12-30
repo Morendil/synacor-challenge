@@ -47,6 +47,7 @@ spec = do
   describe "rmem" $ do
     it "should set a register value from memory after opcode 15, rmem" $ do
       reg (step $ load [15, 32768, 0]) 32768 `shouldBe` 15
+      reg (step $ step $ load [1, 32769, 2, 15, 32768, 32769]) 32768 `shouldBe` 2
   describe "wmem" $ do
     it "should set memory address a from value b after opcode 16, wmem" $ do
       fetch (step $ load [16, 0, 107]) 0 `shouldBe` 107

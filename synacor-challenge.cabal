@@ -25,12 +25,14 @@ common deps
     , containers >= 0.6 && <0.7
     , binary >= 0.8 && <0.9
     , bytestring >= 0.10 && <0.11
+    , memoize >= 0.8 && < 0.9
   default-language:    Haskell2010
 
 executable synacor-challenge
   import: deps
   main-is:             Main.hs
   other-modules:       Arch.Machine
+  ghc-options: -Wall -O2
   -- other-extensions:
 
 test-suite spec
