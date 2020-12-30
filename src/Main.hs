@@ -11,8 +11,17 @@ main = do
     raw <- BL.readFile "data/challenge.bin"
     let program = runGet listOfWord16 raw
     let result = converge step $ load program
-    putStrLn $ map (chr . fromInteger . toInteger) $ output $ result
+    loop result
     putStrLn $ message result
+
+loop :: Machine -> IO ()
+loop m = do
+    let result = converge step m
+    putStrLn $ map (chr . fromInteger . toInteger) $ output $ result
+    if waiting result then do {
+        line <- getLine;
+        loop $ feed (line++"\n") $ m { output = [] }
+    } else return ()
 
 listOfWord16 = do
   empty <- isEmpty

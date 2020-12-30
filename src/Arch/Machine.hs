@@ -45,7 +45,7 @@ step m = case fetch m current of
   15 -> setreg ra (fetch m b) (m { pc = current + 3})
   16 -> write a b (m { pc = current + 3})
   18 -> pop $ jump (top m) m
-  20 -> if null (input m) then m { waiting = True } else setreg ra ((fromInteger . toInteger . ord) $ head (input m)) (m { pc = current + 2})
+  20 -> if null (input m) then m { waiting = True } else setreg ra (topIn m) $ popIn (m { pc = current + 2})
   x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
         a = fetch m $ current+1
@@ -87,6 +87,12 @@ push val m = m { stack = val:(stack m) }
 top :: Machine -> Word16
 top m = head $ stack m
 
+topIn :: Machine -> Word16
+topIn m = (fromInteger . toInteger . ord) $ head (input m)
+
+popIn :: Machine -> Machine
+popIn m = m { input = tail $ input m }
+
 pop :: Machine -> Machine
 pop m = m { stack = tail $ stack m }
 
@@ -103,7 +109,7 @@ write :: Word16 -> Word16 -> Machine -> Machine
 write addr val m = m { memory = M.insert addr val (memory m) }
 
 feed :: String -> Machine -> Machine
-feed line m = m { input = line }
+feed line m = m { input = line, waiting = False }
 
 noop :: Machine -> Machine
 noop = id

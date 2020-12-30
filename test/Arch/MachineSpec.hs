@@ -99,6 +99,7 @@ spec = do
       waiting (step $ load [20, 32768]) `shouldBe` True
     it "should pop from input after opcode 20, input" $ do
       reg (step $ feed "Foo" $ load [20, 32768]) 32768 `shouldBe` (fromInteger . toInteger . ord) 'F'
+      input (step $ feed "Foo" $ load [20, 32768]) `shouldBe` "oo"
   describe "step" $ do
     it "should fetch and execute an instruction" $ do
       halted (step $ load [0]) `shouldBe` True
