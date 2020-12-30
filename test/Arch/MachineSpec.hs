@@ -55,6 +55,10 @@ spec = do
       reg (step $ load [5, 32768, 30000, 30000]) 32768 `shouldBe` 0
       reg (step $ load [5, 32769, 30000, 30001]) 32769 `shouldBe` 0
       reg (step $ load [5, 32769, 30001, 30000]) 32769 `shouldBe` 1
+  describe "and" $ do
+    it "should set a to bitwise (b and c) after opcode 12, and" $ do
+      reg (step $ load [12, 32768, 47, 21]) 32768 `shouldBe` 5
+      reg (step $ load [12, 32768, 63, 21]) 32768 `shouldBe` 21
   describe "push" $ do
     it "should push to the stack after opcode 2, push" $ do
       stack (step $ step $ load [2, 1, 2, 2]) `shouldBe` [2,1]

@@ -2,6 +2,7 @@ module Arch.Machine where
 import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Data.Word
+import Data.Bits
 
 data Machine = Machine {
       halted :: Bool
@@ -31,6 +32,7 @@ step m = case fetch m current of
   2 -> push a (m { pc = current + 2})
   3 -> setreg ra (top m) $ pop (m { pc = current + 2})
   5 -> setreg ra (if b>c then 1 else 0) (m { pc = current + 4})
+  12 -> setreg ra (b .&. c) (m { pc = current + 4})
   x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
         a = fetch m $ current+1
