@@ -22,8 +22,8 @@ data Instruction = Instruction {
 }
 
 instance Show Instruction where
-  show (Instruction { op = Opcode {name, width}, args, addr }) = (printf "0x%06x  " addr) ++ name ++ " [" ++ (intercalate "," $ map showVal args) ++ "]"
-    where showVal val | val < 32768 = printf "0x%x" val
+  show (Instruction { op = Opcode {name, width}, args, addr }) = (printf "0x%04x  " addr) ++ name ++ " [" ++ (intercalate "," $ map showVal args) ++ "]"
+    where showVal val | val < 32768 = printf "0x%04x" val
           showVal reg = "r" ++ show (reg - 32768)
 
 opcodes :: [(Word16, Opcode)]
