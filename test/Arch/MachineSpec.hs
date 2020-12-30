@@ -2,6 +2,7 @@ module Arch.MachineSpec (spec) where
 
 import Test.Hspec
 import Arch.Machine
+import Data.Char
 
 spec :: Spec
 spec = do
@@ -93,6 +94,11 @@ spec = do
     it "should pop from the stack after opcode 3, pop" $ do
       stack (step $ step $ step $ load [2, 1, 2, 2, 3, 32768]) `shouldBe` [1]
       reg (step $ step $ step $ load [2, 1, 2, 2, 3, 32768]) 32768 `shouldBe` 2
+  describe "input" $ do
+    it "should mark the machine as pending if no input is available" $ do
+      waiting (step $ load [20, 32768]) `shouldBe` True
+    it "should pop from input after opcode 20, input" $ do
+      reg (step $ feed "Foo" $ load [20, 32768]) 32768 `shouldBe` (fromInteger . toInteger . ord) 'F'
   describe "step" $ do
     it "should fetch and execute an instruction" $ do
       halted (step $ load [0]) `shouldBe` True

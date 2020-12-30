@@ -3,15 +3,18 @@ import qualified Data.Map as M
 import Data.Maybe (fromMaybe)
 import Data.Word
 import Data.Bits
+import Data.Char
 
 data Machine = Machine {
       halted :: Bool
+    , waiting :: Bool
     , pc :: Word16
     , memory :: M.Map Word16 Word16
     , registers :: M.Map Word16 Word16
     , stack :: [Word16]
     , output :: [Word16]
     , message :: String
+    , input :: String
 } deriving (Eq, Show)
 
 converge :: Eq a => (a -> a) -> a -> a
@@ -19,6 +22,7 @@ converge = until =<< ((==) =<<)
 
 step :: Machine -> Machine
 step m | halted m = m
+step m | waiting m = m
 step m = case fetch m current of
   0 -> halt $ m { pc = current + 1}
   21 -> noop $ m { pc = current + 1}
@@ -41,6 +45,7 @@ step m = case fetch m current of
   15 -> setreg ra (fetch m b) (m { pc = current + 3})
   16 -> write a b (m { pc = current + 3})
   18 -> pop $ jump (top m) m
+  20 -> if null (input m) then m { waiting = True } else setreg ra ((fromInteger . toInteger . ord) $ head (input m)) (m { pc = current + 2})
   x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   where current = pc m
         a = fetch m $ current+1
@@ -97,16 +102,21 @@ jf a b m = if a == 0 then jump b m else m
 write :: Word16 -> Word16 -> Machine -> Machine
 write addr val m = m { memory = M.insert addr val (memory m) }
 
+feed :: String -> Machine -> Machine
+feed line m = m { input = line }
+
 noop :: Machine -> Machine
 noop = id
 
 initial :: Machine
 initial = Machine {
         halted = False
+      , waiting = False
       , pc = 0
       , memory = M.empty
       , registers = M.empty
       , output = []
       , stack = []
       , message = ""
+      , input = ""
     }
