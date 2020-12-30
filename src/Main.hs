@@ -20,7 +20,7 @@ loop m = do
     putStrLn $ map (chr . fromInteger . toInteger) $ output $ result
     if waiting result then do {
         line <- getLine;
-        loop $ feed (line++"\n") $ m { output = [] }
+        loop $ feed (line++"\n") $ result { output = [] }
     } else return ()
 
 listOfWord16 = do
