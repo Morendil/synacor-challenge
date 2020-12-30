@@ -21,10 +21,12 @@ step m = case fetch m current of
   Just 21 -> noop $ m { pc = current + 1}
   Just 19 -> out a (m { pc = current + 2})
   Just 6 -> jump a m
+  Just 7 -> jt a b (m { pc = current + 3})
   Just x -> crash ("Unexpected: " ++ show x ++ " at "++ show current) m
   Nothing -> m
   where current = pc m
         a = fromJust $ fetch m $ current+1
+        b = fromJust $ fetch m $ current+2
 
 fetch :: Machine -> Word16 -> Maybe Word16
 fetch m addr = M.lookup addr (memory m)
@@ -44,6 +46,9 @@ out val m = m { output = output m ++ [val] }
 
 jump :: Word16 -> Machine -> Machine
 jump val m = m { pc = val }
+
+jt :: Word16 -> Word16 -> Machine -> Machine
+jt a b m = if a /= 0 then jump b m else m
 
 noop :: Machine -> Machine
 noop = id
