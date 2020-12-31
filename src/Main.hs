@@ -91,9 +91,7 @@ loop m = do
     putStrLn $ map (chr . fromInteger . toInteger) $ output $ result
     if waiting result then do {
         line <- getLine;
-        let cheat = setreg 32775 (read line) result
-            normal = feed (line++"\n") $ result { output = [] }
-        in if head line == '0' then loop cheat else loop normal
+        loop $ feed (line++"\n") $ result { output = [] }
     } else return ()
 
 listOfWord16 = do

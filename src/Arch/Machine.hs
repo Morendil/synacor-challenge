@@ -118,11 +118,10 @@ step m = case fetch m current of
         ra = raw m (current+1)
 
 fetch :: Machine -> Word16 -> Word16
-fetch m addr = if register then inspect goRegister else plainValue
+fetch m addr = if register then goRegister else plainValue
   where plainValue = fromMaybe 0 $ M.lookup addr (memory m)
         register = plainValue >= 32768
         goRegister = fromMaybe 0 $ M.lookup plainValue (registers m)
-        inspect n = if plainValue == 32775 then traceShow (pc m) n else n
 
 raw :: Machine -> Word16 -> Word16
 raw m addr = fromMaybe 0 $ M.lookup addr (memory m)
