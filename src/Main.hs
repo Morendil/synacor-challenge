@@ -49,9 +49,8 @@ neighbours grid point = mapMaybe nearby offsets
 
 grid :: Grid
 grid = M.fromList [
-      ((0,0),Num 22)
-    , ((1,0),Op (+))
-    , ((0,0),Num 4)
+      ((1,0),Op (+))
+    , ((2,0),Num 4)
     , ((3,0),Op (*))
     , ((0,1),Op (-))
     , ((1,1),Num 4)
